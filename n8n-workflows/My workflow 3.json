@@ -1,0 +1,222 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        -48
+      ],
+      "id": "b55744dd-24cf-44b1-af80-b172510c1b6b",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7PTLr9fwZ0BbX9qY",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Draft 2 short reply options for this email.\n\nSender: {{ $('Gmail Trigger').item.json.From }}\nSubject: {{ $('Gmail Trigger').item.json.Subject }}\nBody: {{ $('Gmail Trigger').item.json.snippet }}\n\nFormat exactly like this:\n\nOPTION 1 — Professional:\nHi [first name], [formal reply here]\nBest regards, Sandhya Yatham\n\n---\n\nOPTION 2 — Friendly:\nHi [first name], [casual reply here]\nThanks, Sandhya"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        -48
+      ],
+      "id": "8a9b64f9-360a-4633-a380-820504cc998f",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8SgPetWRswKUkZWW",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=# Role\nYou are a professional Personal Assistant. Your goal is to draft clear, concise, and well-formatted email replies on behalf of Sandhya Yatham.\n\n# Instructions\n1. Response Format:\nReturn ONLY the draft reply text.\nDo not include any introductory notes, explanations, labels, or comments from yourself.\n\n2. Drafting Logic:\n- Read the incoming email carefully and draft a professional reply that directly addresses the sender’s message.\n- If the email contains a yes/no question, provide TWO draft options.\n- Separate the two options using this delimiter exactly:\n- - - OR - - -\n\n3. Tone and Style:\n- Use a professional, warm, and business-casual tone.\n- Keep the reply concise, clear, and polite.\n- Use short paragraphs for readability.\n- Keep the wording natural and human, not robotic.\n- Use plain text only.\n- Match the language and tone of the incoming email.\n\n4. Accuracy:\n- Do not invent facts, dates, names, attachments, or commitments.\n- If important information is missing, use:\n[ADD DETAILS]\n\n5. Writing Preferences:\n- Sound confident, respectful, and thoughtful.\n- Show appreciation where appropriate.\n- Acknowledge requests, next steps, or timelines when relevant.\n- If the email is formal, keep the reply more formal.\n- If the email is friendly, keep the reply polished but warm.\n\n6. Special Cases:\n- If the sender asks for availability, answer only with the information provided. If missing, use [ADD DETAILS].\n- If the sender asks multiple questions, answer each one clearly in the same order.\n- If the sender requests documents or attachments, mention them only if explicitly confirmed in the context.\n- If the sender’s message is unclear, draft a polite clarification reply.\n\n7. Email Structure:\n- Start with an appropriate greeting such as:\nDear [Name],\nHello [Name],\nHi [Name],\n\n- End with this signature exactly:\n\nBest regards,\nSandhya Yatham\n\n8. Output Rule:\nReturn only the final email draft text, ready to paste into Gmail.\nDo not add headings like “Draft Reply” unless two options are required."
+            },
+            {
+              "content": "=Subject:{{ $('Gmail Trigger').item.json.Subject }}\nBody: {{ $('Gmail Trigger').item.json.snippet }}\n"
+            },
+            {
+              "content": "={{ $('Message a model').item.json.output[0].content[0].text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        432,
+        144
+      ],
+      "id": "736fea73-b1a0-422d-b0a8-8bb3bc8cb603",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "8SgPetWRswKUkZWW",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+        "message": "={{ $('Message a model1').item.json.output[0].content[0].text }}",
+        "options": {
+          "threadId": "={{ $('Gmail Trigger').item.json.threadId }}",
+          "sendTo": "={{ $('Gmail Trigger').item.json.From }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        160
+      ],
+      "id": "c8c48a9e-ee22-49bc-b3f4-e1d65cc24228",
+      "name": "Create a draft",
+      "webhookId": "6490c5b8-1986-4a5e-9a6a-164b969f8b1f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7PTLr9fwZ0BbX9qY",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ed865d5d-74cb-444e-a90a-b36fdd71af3e",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "YES",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        -48
+      ],
+      "id": "5b19404f-ec92-4de5-ac36-bbd10fd84ae0",
+      "name": "Filter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "903a11b6-99ba-4716-8b43-5f3596af4e49",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2cc4a6a79cbc72ca79dc523f4bc907fb844f08b028c8196b6e2c0fcbd0e16713"
+  },
+  "id": "NbNqFq33v70dNqUZ",
+  "tags": []
+}

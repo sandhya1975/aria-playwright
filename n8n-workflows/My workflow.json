@@ -1,0 +1,176 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 1,
+              "unit": "minutes"
+            },
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "133ef7cf-366b-4066-a00e-261a9e3fd3d2",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7PTLr9fwZ0BbX9qY",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "615cb9a1-b200-4c7a-8c99-e1b87b9e5ec8",
+              "leftValue": "=Subject {{ $json.Subject }}",
+              "rightValue": "interview ",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "8821757a-81a6-48e2-bfd3-ac80ae6abd22",
+              "leftValue": "=Subject {{ $json.Subject }}",
+              "rightValue": "availability",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "1fd2c4d2-5352-431d-8d3a-1f9b8b23d2a3",
+              "leftValue": "=Subject {{ $json.Subject }}",
+              "rightValue": "next steps",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b4ce35b6-ad0a-466e-b358-fb7a9bd1d1a9",
+              "leftValue": "=Subject {{ $json.Subject }}",
+              "rightValue": "speak",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "f4e4c38e-bcea-4cbe-bbfc-4d6f41d7adb1",
+              "leftValue": "=Subject {{ $json.Subject }}",
+              "rightValue": "keen to discuss",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "2a59d292-6c4a-43ff-9d10-d8c8d0f57420",
+              "leftValue": "=Subject {{ $json.Subject }}",
+              "rightValue": "invite",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a6c5eefd-bc7d-453a-aa1a-8cc9bb20ec56",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "sendTo": "yvsand81@yahoo.com",
+        "subject": "=URGENT RECRUITER REPLY — {{ $json.Subject }}",
+        "message": "=`From: {{ $json.From }} Subject: {{ $json.Subject }} Message: {{ $json.snippet }}`",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "e5110d58-5a3c-492c-a8f6-9555c2c1b520",
+      "name": "Send a message",
+      "webhookId": "0264089b-8dff-4e55-a558-0ebcbb59c783",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7PTLr9fwZ0BbX9qY",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c17d4bc7-983a-4a4c-930f-498c0477b77e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2cc4a6a79cbc72ca79dc523f4bc907fb844f08b028c8196b6e2c0fcbd0e16713"
+  },
+  "id": "ODkDT9yOYiyxI98W",
+  "tags": []
+}

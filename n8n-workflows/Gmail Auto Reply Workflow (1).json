@@ -1,0 +1,656 @@
+{
+  "name": "Gmail Auto Reply Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 1,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "53849246-ad32-4845-9976-9f9688f5a6f2",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "Yes"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "579d54f2-8c04-4624-890a-c432d96f3911",
+      "name": "If Needs Reply",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1680,
+        368
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Gmail trigger').item.json.subject }}",
+        "message": "={{ $json.text }}",
+        "options": {
+          "threadId": "={{ $('Gmail trigger').item.json.threadId }}",
+          "sendTo": "={{ $('Gmail trigger').item.json.from.value[0].address }}"
+        }
+      },
+      "id": "d10724dd-406c-4143-9c22-2c3ecd45e6be",
+      "name": "Gmail - Create Draft",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2304,
+        368
+      ],
+      "webhookId": "a39b80e1-12c5-4569-aa46-63a2c2bd2d13",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "huZBULKfefE6JzEi",
+          "name": "jitesh@pdfmunk.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $('Gmail trigger').item.json.subject }}\nMessage: {{ $('Gmail trigger').item.json.textAsHtml }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# Role\nYou are a professional Personal Assistant. Your goal is to draft clear, concise, and well-formatted email replies on behalf of Jitesh Dugar.\n\n# Instructions\n1. **Response Format:** Return ONLY the draft reply text. Do not include any introductory or concluding remarks from yourself.\n2. **Drafting Logic:** - If the incoming email asks a \"yes/no\" question, provide TWO draft options: one affirmative and one negative.\n   - Separate these two options with a clear delimiter: \" - - - - - - - OR - - - - - - - \".\n3. **Tone & Style:** - Use a professional yet \"business casual\" tone.\n   - Keep the content concise and well-structured with clear paragraph breaks.\n   - Use plain text only (no bolding, italics, or HTML).\n4. **Accuracy:** - Do not invent facts. If information is missing, use the placeholder `[YOUR_ANSWER_HERE]`.\n   - Reply in the same language as the incoming email.\n\n# Email Structure\n- **Salutation:** Start with \"Dear [Name or Team],\"\n- **Signature:** Always include the following signature at the very end:\n\nStay Healthy\nJitesh Dugar"
+            }
+          ]
+        }
+      },
+      "id": "a548fcdd-1f5e-4a75-b136-07ecf4e96d3d",
+      "name": "Generate email reply for an English client",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        1952,
+        352
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "includeSpamTrash": false
+        },
+        "options": {}
+      },
+      "id": "323eb990-e7c4-4495-811a-a3c5b26c27f0",
+      "name": "Gmail trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        1152,
+        368
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "huZBULKfefE6JzEi",
+          "name": "jitesh@pdfmunk.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $json.subject }}\nMessage:\n{{ $json.textAsHtml }} ",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Your task is to assess if the message requires a response.\n\nIf the email requires a response, then reply with \"Yes\"\nIf the email does not require a response, then reply with \"No\"\n\nMarketing emails don't require a response.\n\nStrictly - do not reply with anything other than \"Yes\" or \"No\""
+            }
+          ]
+        }
+      },
+      "id": "384d0d20-9858-4470-9f8d-79634410cd55",
+      "name": "Generate email reply for an English client1",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        1376,
+        368
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-mini",
+        "options": {}
+      },
+      "id": "1659ef58-d317-4260-99a8-f1de50d50839",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1248,
+        608
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "8IkhtT3EbXygnvcr",
+          "name": "Mediajade"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-mini",
+        "options": {}
+      },
+      "id": "79600a11-8038-48d7-a7a5-5c0ffdb6d412",
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1936,
+        624
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "Z0PR4rmJpcAyuftC",
+          "name": "OpenAi - HSR"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Gmail trigger": [
+      {
+        "json": {
+          "id": "19d3a5dbd5552315",
+          "threadId": "19d3a5dbd5552315",
+          "labelIds": [
+            "UNREAD",
+            "IMPORTANT",
+            "CATEGORY_PERSONAL",
+            "INBOX"
+          ],
+          "sizeEstimate": 7163,
+          "headers": {
+            "delivered-to": "Delivered-To: jitesh@pdfmunk.com",
+            "received": "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n        by mx.google.com with SMTPS id 71dfb90a1353d-56d5887847dsor707435e0c.1.2026.03.29.09.11.54\r\n        for <jitesh@pdfmunk.com>\r\n        (Google Transport Security);\r\n        Sun, 29 Mar 2026 09:11:54 -0700 (PDT)",
+            "x-received": "X-Received: by 2002:a05:6122:8c0f:b0:56a:8f7c:49aa with SMTP id\r\n 71dfb90a1353d-56d4b9c212emr3521922e0c.4.1774800714464; Sun, 29 Mar 2026\r\n 09:11:54 -0700 (PDT)",
+            "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1774800714; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=kundAv3qSGDrYg4zCat8zfnuKYgL/oGBI1sMApPyeWIRHzZSO2wK4g0apX0rmy5e30\r\n         jytTK0FIQK6I9WSBKrPCEDat6cAf80f4eP5c3Nde0MsuH07Kcf4RYmmG+W/+h3LlWytl\r\n         7cHqGI5Ojnc9eRVDKAIXYbf6Chpav6PkjvXZ/BLUi4O6zAQCl0uwHPq+L4+c6XBdTajT\r\n         A77GuaA3iKsda0BzpDqc+x3a+GXzGAuDtcs8JKzPrLlR4hzd58XV9HoX61+kHKGLBtlp\r\n         JDn4PQefhGyMv99yz+20B/yChhatU+eKJkqwmNZCcB24fci7bspKygn+f+OgmT3uv22p\r\n         nFYQ==",
+            "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:subject:message-id:date:from:mime-version:dkim-signature;\r\n        bh=vdvPN1we53rPZ7INvrG6rb/aCLMqzPRRBGhG2RBZqK8=;\r\n        fh=FyIeH2J1mPUQ1b/9HSiRA2tkZ71qLQ6ZJiQZ8xi/K4A=;\r\n        b=Byf74U5twobfR5/3M9DDtdluYT3CQiCmqk8oYue7zrXSeqj+GFWNnPTWmCY30YLOYt\r\n         wmMfOqHZi3Lp48TdtVm8KJnV5PCs5WAPKA1O8VqnjM6KZi4dAxrSzDXa3FwJJKcDC+QM\r\n         m/WaLxn2qFMC6bxjJtnLhEwNbh68xI+RwLjxaQtm6JwvyUMOFj8kVQycleaKv9SWiHAT\r\n         awG66Y3JQYS0MCp+8GsQumzBqBK0crCIIgewAw/dY+HN77v59xUGdynPUrTxBaVkjhS+\r\n         NAnsAhqo59T3i+6ZPdAlz5OhN64+mZ/B5pe18eVZa+kzvI6XyOlKWVdxxAqWYTQKgHpy\r\n         qGkA==;\r\n        darn=pdfmunk.com",
+            "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com; arc=none",
+            "return-path": "Return-Path: <nitin.officialmarketing@gmail.com>",
+            "received-spf": "Received-SPF: pass (google.com: domain of nitin.officialmarketing@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+            "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20251104 header.b=mWKSTGaG;\r\n       arc=pass (i=1);\r\n       spf=pass (google.com: domain of nitin.officialmarketing@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=nitin.officialmarketing@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=neutral header.i=@pdfmunk.com",
+            "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20251104; t=1774800714; x=1775405514; darn=pdfmunk.com;\r\n        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject\r\n         :date:message-id:reply-to;\r\n        bh=vdvPN1we53rPZ7INvrG6rb/aCLMqzPRRBGhG2RBZqK8=;\r\n        b=mWKSTGaGkO/7BvVxr/UzmGrC6epy8kzO2Ju5COSaMWadbyQTVp7YVflLmnfyplvC2Z\r\n         PkdR+hvMAOzRhU4OTcNIaKr2zBS9InY1A2sDV7t68Iqyxm4XHhR4xUn34+JqgIIPMrcl\r\n         2qHi3Y6cHk20RD7rd7MGGOpcqoBjKxao+foUM56/w+gzmZWRMLOr/nTp04YBu2uJJm/W\r\n         V7p0qx+3Nhjomd/W/iibZIMRuWZtTr1xqxZu2J2mWcReI1Eo8HT58eC2v5Muqkk5/ZJV\r\n         lh6E9czLnn8EN8GLhQWmP5EZicjrCA5IJifsBY7rh4ikNKdUuKZwrDjGfvQPPkbuDV8D\r\n         /EnQ==",
+            "x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20251104; t=1774800714; x=1775405514;\r\n        h=to:subject:message-id:date:from:mime-version:x-gm-gg\r\n         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;\r\n        bh=vdvPN1we53rPZ7INvrG6rb/aCLMqzPRRBGhG2RBZqK8=;\r\n        b=Dj65eeLEvnb8+gd4L1nxuD6q4wILKDg4SG+cXBtJ0rYckm3Pv1EucB7ulut40Q1t0I\r\n         OILfa8IcvQnZwc6FxciqMfzw7wDLkYQdKxgs2o1hxLxNgjh6fp20EUJ1rkMyzV9KqFRf\r\n         nChCDgNQVRATYEXJIu5WvzP+d2H+yWuXdZXki93gxUcLSG+ovOB1EMP8KhWrv9/V3woD\r\n         FzAOGLBqqYTO+v8907FKOw1vxOLMYrVXvPkQ6rQnHxT4p+MjGzuxMDrhZAgPPXNX/mEJ\r\n         HNeU/MfMzTI0IMWHIWKr+y82e0ynppOkf2bhjkDf8U/1Qgmllh3mUn1CKqOSrScrmI0t\r\n         Ccdw==",
+            "x-gm-message-state": "X-Gm-Message-State: AOJu0YyvrR9tcTXS1rfNj4fn8h5rm7UuscC4i1VaiSCQzhsfNerG5k+9\r\n\tJwArOw1NjwXwD53y6qBO84O7yJmeNLFpTuJoOXMZ4G1IROsTYNS36pB8/Y+U3z//UNXUBhNWuxO\r\n\tdLHex93huPeDMsB3pp88Y7NmrysWsvc27LQ==",
+            "x-gm-gg": "X-Gm-Gg: ATEYQzxRL3pdHD/xgEiOaSCamXul5XmSCqsuAU09M/0i+YSa1PZA8wad5vMgDBVNWHF\r\n\tU1UcQkfi+L5MQKuC5Q+h6CdNT5oYqXJY6zyBnf3WAuhRq4wPmrM3XyMEMGFq7H4+aptKEakc433\r\n\t/hfKHwCkezlfBVhcTZZRfxhOkn7lDXaN75qCr1PMmt8MJhaj1OBfFbR7YDmqrqOuthbxCmuwqdM\r\n\trH/QIWieZFbssTQ9bOW0+cgZhryVy7X3sWNHb8Ss/j86qwQ6sw/ej3CZNxy+rX2dtnzOvzKPy7C\r\n\te9BW6MvfmaEdcdkqWs/R",
+            "mime-version": "MIME-Version: 1.0",
+            "from": "From: Nitin <nitin.officialmarketing@gmail.com>",
+            "date": "Date: Sun, 29 Mar 2026 21:41:43 +0530",
+            "x-gm-features": "X-Gm-Features: AQROBzB2AQwuJhcXyn2UltAtGDq5kmyqMeHTuDGzchc0Qw_6Oto0hYGVKpkzI9g",
+            "message-id": "Message-ID: <CAFN8ij+PiWscCa=TKYaVyuaRieAKcNeDFk7TR0b0VS_aTv-O6w@mail.gmail.com>",
+            "subject": "Subject: Required a detailed session on n8n",
+            "to": "To: \"jitesh@pdfmunk.com\" <jitesh@pdfmunk.com>",
+            "content-type": "Content-Type: multipart/alternative; boundary=\"00000000000022006d064e2bfea7\""
+          },
+          "html": "Thank you for conducting a wonderful sessions. Can you please conduct a more detail session on n8n\n",
+          "text": "Thank you for conducting a wonderful sessions. Can you please conduct a\nmore detail session on n8n\n",
+          "textAsHtml": "<p>Thank you for conducting a wonderful sessions. Can you please conduct a<br/>more detail session on n8n</p>",
+          "subject": "Required a detailed session on n8n",
+          "date": "2026-03-29T16:11:43.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "jitesh@pdfmunk.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:jitesh@pdfmunk.com\" class=\"mp_address_email\">jitesh@pdfmunk.com</a></span>",
+            "text": "jitesh@pdfmunk.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "nitin.officialmarketing@gmail.com",
+                "name": "Nitin"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Nitin</span> &lt;<a href=\"mailto:nitin.officialmarketing@gmail.com\" class=\"mp_address_email\">nitin.officialmarketing@gmail.com</a>&gt;</span>",
+            "text": "\"Nitin\" <nitin.officialmarketing@gmail.com>"
+          },
+          "messageId": "<CAFN8ij+PiWscCa=TKYaVyuaRieAKcNeDFk7TR0b0VS_aTv-O6w@mail.gmail.com>"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "id": "19d3a5d9c97f55e4",
+          "threadId": "19d3a5d9c97f55e4",
+          "labelIds": [
+            "UNREAD",
+            "IMPORTANT",
+            "CATEGORY_PERSONAL",
+            "INBOX"
+          ],
+          "sizeEstimate": 7206,
+          "headers": {
+            "delivered-to": "Delivered-To: jitesh@pdfmunk.com",
+            "received": "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n        by mx.google.com with SMTPS id 38308e7fff4ca-38c836d55c5sor6730211fa.1.2026.03.29.09.11.46\r\n        for <jitesh@pdfmunk.com>\r\n        (Google Transport Security);\r\n        Sun, 29 Mar 2026 09:11:46 -0700 (PDT)",
+            "x-received": "X-Received: by 2002:a2e:9802:0:b0:38c:4751:b201 with SMTP id\r\n 38308e7fff4ca-38c653f9050mr32157151fa.12.1774800705595; Sun, 29 Mar 2026\r\n 09:11:45 -0700 (PDT)",
+            "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1774800706; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=GWPIED5DDHuBjD/JJ03a6a0k9mKGZH3A1jY079PWvRHoIAscQW0BKty+AcGbyT7qPy\r\n         ux0jJRz8CZKSNUTSsjvBDApV59/6l/0dJ5xlx7s995HGV76oM2BR8mAF/UtkyAQp0dJu\r\n         cS3pgR3HdJSda44Qry1PnXOk/ESn9ZxFg8ONW/tjWN4GrI45QnT0SpHzM/Nc9rLjW/V+\r\n         z40//kTX1q7zFw+RIC1+OprfSEJPXzIshQvgT1/rD+jS0AJHTwMFLJfMIsMBayPAR9Pn\r\n         Y6LxEdz+NoFQDQAmSh+K3811Tly8A+T5YTUG4PyxqmuuDVL1k+vfAm5zOlb/bBoz3Y8M\r\n         YmIQ==",
+            "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:subject:message-id:date:from:mime-version:dkim-signature;\r\n        bh=E8tvmnStHxwD0qEhNQY1vo4X4S2ayh7YSiqRnoqTrec=;\r\n        fh=wkWL1p+GxZee2sMl7jmiOoES+V2gR7rSbfQK43Zybt0=;\r\n        b=dwIu/pWaOLTllU+7NRDp/mBoLzJmoe4axipFCcsEqzR/po8C95idX230oCXG2FTW9o\r\n         Lj6WZUoVTVk8+g0xzzqJJ3v8+iZz9njb0l/yAiWO1Gyrfy++XWEN2xBkaUt1fSgHlek7\r\n         p5UFDfc34nEQ5v9fWISQawvg31WI7hijFAcSBsLcWtKpDA2/JSjEw2Z5R8aNLdRHOT7j\r\n         R5G3GzV6/vZfqD9Qp6n3E7sGYLdTMfnw0KY20Vl3M4ZCXUX0KX58mrtuRCTdqy/37W+v\r\n         j8DTANzB4t4PcAF05HaCozx8n8fWBDsSS+g9rXYZsLzk6IljyDii/RK4aHYMR3H0tGA2\r\n         85aw==;\r\n        darn=pdfmunk.com",
+            "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com; arc=none",
+            "return-path": "Return-Path: <dhanwanti.mul@gmail.com>",
+            "received-spf": "Received-SPF: pass (google.com: domain of dhanwanti.mul@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+            "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20251104 header.b=mObKkUCC;\r\n       arc=pass (i=1);\r\n       spf=pass (google.com: domain of dhanwanti.mul@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=dhanwanti.mul@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=neutral header.i=@pdfmunk.com",
+            "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20251104; t=1774800706; x=1775405506; darn=pdfmunk.com;\r\n        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject\r\n         :date:message-id:reply-to;\r\n        bh=E8tvmnStHxwD0qEhNQY1vo4X4S2ayh7YSiqRnoqTrec=;\r\n        b=mObKkUCC3K+NNNnmKx3Ef/HFoY3i0ZqO9ld8VRhqknpoYClE/BNTBdRvbg7eyCzUdN\r\n         iVVeflfkJs+LyKU8P1RWTYZ9o3IihSbKXtLY7SpnJclfLaApxsirohQWi5IxIn/9YmAF\r\n         aWljh8stfM7mOcgA+FFpwJDXqeSX65D1DIRpEBGqe4q5bLXB0tZ6ZTKmFSTnNRZnX+ed\r\n         X8E4p5PyKHc4dbHaiRr40VkgwLQ7lwSRZF1hQyguHqJAq1xwmFIhBksL10FMFFz3pvyZ\r\n         wKsPlQdbSEhZG4Y3+soi5nTyw4xb+RMyY2SQQaoKTK9BPsTpWRUquvWIWyVoq/dDIuC6\r\n         Rf+Q==",
+            "x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20251104; t=1774800706; x=1775405506;\r\n        h=to:subject:message-id:date:from:mime-version:x-gm-gg\r\n         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;\r\n        bh=E8tvmnStHxwD0qEhNQY1vo4X4S2ayh7YSiqRnoqTrec=;\r\n        b=RWXEKPMfrwzYkxNFdavGJ+MJSpAYOC5UFEiRM3WvaHSYS+mQiWiDBPZS1fRpEsAQi/\r\n         kjs7/bbgtLT8ufCiJWpy4U04PrmBKYjjiTMCSsxclHh8yAbj42/osGDvTogEyZHBNMgw\r\n         cAyzjCAVATkVDBUbu7fn1sdRcMEKONvafx5X6o/pC00bI5SsNacbecePFUdGdyDh3sCp\r\n         NnlfKou3tUvsEiezfIwofiIs77pVNbmzlP0LYQre2VmGbI2Hq+19Zrh2KmoFkE0H/jrW\r\n         fPjuvGQu2QG8kyNMorrGaq6ZrH3ekba9OD9guV+x022ZCRwXgKA8Hxje7vq3qHSCL+ko\r\n         t7Rw==",
+            "x-gm-message-state": "X-Gm-Message-State: AOJu0Yy6eXUNNIEFhO9mUsc6j9FgV+b/W2UvI9TJ2HCDzcxJK4efW4nL\r\n\tTUTDda8HkYkcj6RQTw1GTGyGziP6w/BKzVeYpkLl/0awuuFhsEHbIritTFf8Ue8ORehmcipocQM\r\n\tg2tVWhdD6rVAEor/WwnWfTkNIdA/c1hNJrw==",
+            "x-gm-gg": "X-Gm-Gg: ATEYQzydFT9SsbZHynDUtXwRPvIYlM5rpps2Ju1/qHF7YFHtF7jAW58JQG50T36ySuM\r\n\tKdaibZ32IwGARzoFpSOmsZ9EjwKMSr9wCJ8YvWczRhBbppM/8QamXjOAyJblglN8p8nzQKDcY7l\r\n\tnVgeNiJ6EbroxuNT49Dh5z+z/OxVNpsdZvTAw2FYAOJu78o5wr4UrxLkMvl/+vgKWtJ81WIBSEb\r\n\tdBiGOZU8QryS0oD7zOoGZPIE4FmezwDdzsMOovuV9xethSz9zLecq7YhuGo+8A/PDSfuUZKDZs8\r\n\tnze/K+mxYT6ebRl3S5zXvK6Gu+52pR4HqopvPkT1iD+LyXDtegyeIwt6qvn6UllHeJB9dobz",
+            "mime-version": "MIME-Version: 1.0",
+            "from": "From: Dhanwanti Mulchandani <dhanwanti.mul@gmail.com>",
+            "date": "Date: Sun, 29 Mar 2026 20:11:32 +0400",
+            "x-gm-features": "X-Gm-Features: AQROBzArYsHysdeUqB79Qw2DY_FpxAR1r-SnpjVtRQnZzqSRhl1faw73Kb4Fgdc",
+            "message-id": "Message-ID: <CADrXD6GWPTRwt6x4swK9JbycdnO-1OrT3fvUNgo9CnCzPcY8AQ@mail.gmail.com>",
+            "subject": "Subject: Your contact info",
+            "to": "To: jitesh@pdfmunk.com",
+            "content-type": "Content-Type: multipart/alternative; boundary=\"0000000000009aad5d064e2bfd4f\""
+          },
+          "html": "<div dir=\"ltr\">Hi Jitesh,<div><br></div><div>Would you like to share your contact handles for connection.</div><div><br></div><div><br></div><div>Regards</div><div>Dhanwanti</div></div>\n",
+          "text": "Hi Jitesh,\n\nWould you like to share your contact handles for connection.\n\n\nRegards\nDhanwanti\n",
+          "textAsHtml": "<p>Hi Jitesh,</p><p>Would you like to share your contact handles for connection.</p><p>Regards<br/>Dhanwanti</p>",
+          "subject": "Your contact info",
+          "date": "2026-03-29T16:11:32.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "jitesh@pdfmunk.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:jitesh@pdfmunk.com\" class=\"mp_address_email\">jitesh@pdfmunk.com</a></span>",
+            "text": "jitesh@pdfmunk.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "dhanwanti.mul@gmail.com",
+                "name": "Dhanwanti Mulchandani"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Dhanwanti Mulchandani</span> &lt;<a href=\"mailto:dhanwanti.mul@gmail.com\" class=\"mp_address_email\">dhanwanti.mul@gmail.com</a>&gt;</span>",
+            "text": "\"Dhanwanti Mulchandani\" <dhanwanti.mul@gmail.com>"
+          },
+          "messageId": "<CADrXD6GWPTRwt6x4swK9JbycdnO-1OrT3fvUNgo9CnCzPcY8AQ@mail.gmail.com>"
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "id": "19d3a5d99640560e",
+          "threadId": "19d3a5d99640560e",
+          "labelIds": [
+            "UNREAD",
+            "IMPORTANT",
+            "CATEGORY_PERSONAL",
+            "INBOX"
+          ],
+          "sizeEstimate": 10615,
+          "headers": {
+            "delivered-to": "Delivered-To: jitesh@pdfmunk.com",
+            "received": "Received: from c-71-239-155-156.hsd1.il.comcast.net ([71.239.155.156]:62879 helo=DESKTOPO9V6NKV)\r\n\tby host2044.hostmonster.com with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384\r\n\t(Exim 4.98.2)\r\n\t(envelope-from <kantha@corvusblue.net>)\r\n\tid 1w6sjo-00000002po3-0LIK\r\n\tfor jitesh@pdfmunk.com;\r\n\tSun, 29 Mar 2026 10:11:44 -0600",
+            "x-received": "X-Received: by 2002:a05:6a20:7d9c:b0:398:a1ca:7a22 with SMTP id adf61e73a8af0-39c87b95fecmr10324169637.54.1774800705737;\r\n        Sun, 29 Mar 2026 09:11:45 -0700 (PDT)",
+            "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1774800705; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=CAlBfAgBXDJMXXlsyOhKFsxzLJxJaBUBpAulWTEiJNSSsCEcmNi5ShEEusKTDyagjd\r\n         Zln7+4mJXc2k3bvV9R1wxHVDuuHvmDZI5vJ2E0ui+WKF4lRvKz2Rt5ATpChKB24ojog9\r\n         UDk4lY8z6tDLRO8joZSjLWBB59ZDtoZBWw5aFMe4lRCt9Wpsre1CbmGPOHUffaa3lwZ4\r\n         kGCNe5hvYpsoOANLB3kvA0dwicGQ1uVemfJpKBxXeKz3jYnNKjtcEhEtT0an+F76n/fw\r\n         RwQOJSskggvYB0FxO6m6pwQl/SzqyyDZtE84i0PaIn8ivhm7uUxscc3qHB1ayeaauY/x\r\n         Je3w==",
+            "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=content-language:thread-index:mime-version:message-id:date:subject\r\n         :to:from:dkim-signature;\r\n        bh=tZndneRMbKytb13G0cBDtnUQbIcyUri1y710xFf35ZE=;\r\n        fh=sJgnxgRTZ+b6qsyYMEAiAZsYUfW2qg64uMTXPo2Dwno=;\r\n        b=kcdTHUtjV34XwAfdYcpu2x7oI97m9KQRSM22VfA5Ud4e6S0nZtvuAjy2Y8C/0DyjRn\r\n         hB+7ePfTUTbnmEgrSMmZj/Yee/ZPtgUjVYQN5IvY6uP8UsStRG/9XL1X1mFax7op7ulW\r\n         Urtj9mLphC+6Z1jGPl9zbsLP9sTGF7tHnRjGmFa9ys8MYJzoIzkl1XEmxK8wXDeZvMYb\r\n         Sq3MklQSqelfZ5nUe8pyRRP1rszmGUCtozAWBCFFofT5bIuzYC1iPY8Nsx8LO0rbj4cx\r\n         XFBCJyFcP3lgF/wGvLOReMrW4zRYZQGYbDb4zaM5ehpx4ZObEwmMU3rooAViPObD1bvH\r\n         vXuQ==;\r\n        dara=google.com",
+            "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com;\r\n       dkim=policy (weak key) header.i=@corvusblue.net header.s=default header.b=DGpLsbec;\r\n       spf=pass (google.com: domain of kantha@corvusblue.net designates 35.89.44.37 as permitted sender) smtp.mailfrom=kantha@corvusblue.net",
+            "return-path": "Return-Path: <kantha@corvusblue.net>",
+            "received-spf": "Received-SPF: pass (google.com: domain of kantha@corvusblue.net designates 35.89.44.37 as permitted sender) client-ip=35.89.44.37;",
+            "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=policy (weak key) header.i=@corvusblue.net header.s=default header.b=DGpLsbec;\r\n       spf=pass (google.com: domain of kantha@corvusblue.net designates 35.89.44.37 as permitted sender) smtp.mailfrom=kantha@corvusblue.net",
+            "x-authority-analysis": "X-Authority-Analysis: v=2.4 cv=PN8P+eqC c=1 sm=1 tr=0 ts=69c94f40\r\n a=O1AQXT3IpLm5MaED65xONQ==:117 a=ia2P3G9EB094qPIM7HcERg==:17\r\n a=Yq5XynenixoA:10 a=dOBApVWyS3MA:10 a=DAwyPP_o2Byb1YXLmDAA:9\r\n a=mMwrev5Am-E2QQCErm0A:9 a=CjuIK1q_8ugA:10 a=zZCYzV9kfG8A:10 a=yMhMjlubAAAA:8\r\n a=SSmOFEACAAAA:8 a=iabLDcrXKaSrVjCXUMYA:9 a=tbN4J6O6nX-WpvEy:21\r\n a=gKO2Hq4RSVkA:10 a=UiCQ7L4-1S4A:10 a=hTZeC7Yk6K0A:10 a=frz4AuCg-hUA:10\r\n a=Q2wtrFWRA_2J-EpBzDuD:22",
+            "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;\r\n\td=corvusblue.net; s=default; h=Content-Type:MIME-Version:Message-ID:Date:\r\n\tSubject:To:From:Sender:Reply-To:Cc:Content-Transfer-Encoding:Content-ID:\r\n\tContent-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc\r\n\t:Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:\r\n\tList-Subscribe:List-Post:List-Owner:List-Archive;\r\n\tbh=tZndneRMbKytb13G0cBDtnUQbIcyUri1y710xFf35ZE=; b=DGpLsbecvHVgs/P7wLmXsIY2a1\r\n\tJcmNt/hNk7KIBjDvvm7sL9uEbiEp8ANN42cUI5Rb4OTavc1yfxB1mZLcO2nTtqomJdXXeOwJr10zW\r\n\toaMEKBn4YyX+eEV5nEysU3xUe;",
+            "from": "From: \"Kantha Shelke\" <kantha@corvusblue.net>",
+            "to": "To: <jitesh@pdfmunk.com>",
+            "subject": "Subject: sample email for testing",
+            "date": "Date: Sun, 29 Mar 2026 11:11:42 -0500",
+            "message-id": "Message-ID: <045801dcbf96$bc2e1ad0$348a5070$@corvusblue.net>",
+            "mime-version": "MIME-Version: 1.0",
+            "content-type": "Content-Type: multipart/alternative;\r\n\tboundary=\"----=_NextPart_000_0459_01DCBF6C.D358D620\"",
+            "x-mailer": "X-Mailer: Microsoft Outlook 16.0",
+            "thread-index": "Thread-Index: Ady/lqC/hvMMeKX0QAS9O1zzRGCPmg==",
+            "content-language": "Content-Language: en-us",
+            "x-antiabuse": "X-AntiAbuse: Sender Address Domain - corvusblue.net",
+            "x-bwhitelist": "X-BWhitelist: no",
+            "x-source-ip": "X-Source-IP: 71.239.155.156",
+            "x-source-l": "X-Source-L: No",
+            "x-exim-id": "X-Exim-ID: 1w6sjo-00000002po3-0LIK",
+            "x-source": "X-Source: ",
+            "x-source-args": "X-Source-Args: ",
+            "x-source-dir": "X-Source-Dir: ",
+            "x-source-sender": "X-Source-Sender: c-71-239-155-156.hsd1.il.comcast.net (DESKTOPO9V6NKV) [71.239.155.156]:62879",
+            "x-source-auth": "X-Source-Auth: kantha@corvusblue.net",
+            "x-email-count": "X-Email-Count: 1",
+            "x-org": "X-Org: HG=bhshared_hm;ORG=bluehost;",
+            "x-source-cap": "X-Source-Cap: Y29ydnVzYmw7Y29ydnVzYmw7aG9zdDIwNDQuaG9zdG1vbnN0ZXIuY29t",
+            "x-local-domain": "X-Local-Domain: yes",
+            "x-cmae-envelope": "X-CMAE-Envelope: MS4xfMl3KBqJAR/0WDesSVJIIMREH9xK+qLHr8vIUvLLfrPxLawgEzvwyZpc/dxcJkPXQwq2VecCuUajf8QRyh1YkXXYJZ6NNlikwwNxOGhsRznpxQcnFygz\r\n gh52y9WtlgsxOi5TrUcqhtrUezOoaHPiv1tXdhnRN0WzkyS7S/AKbK8eSo/X3fPks6CGK8cJnvkJcVbXp9Ty9l4Nz6iZlyx+IZo="
+          },
+          "html": "<html xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" xmlns:m=\"http://schemas.microsoft.com/office/2004/12/omml\" xmlns=\"http://www.w3.org/TR/REC-html40\"><head><meta http-equiv=Content-Type content=\"text/html; charset=us-ascii\"><meta name=Generator content=\"Microsoft Word 15 (filtered medium)\"><style><!--\n/* Font Definitions */\n@font-face\n\t{font-family:\"Cambria Math\";\n\tpanose-1:2 4 5 3 5 4 6 3 2 4;}\n@font-face\n\t{font-family:Calibri;\n\tpanose-1:2 15 5 2 2 2 4 3 2 4;}\n@font-face\n\t{font-family:Aptos;}\n@font-face\n\t{font-family:Georgia;\n\tpanose-1:2 4 5 2 5 4 5 2 3 3;}\n@font-face\n\t{font-family:\"Arial Narrow\";\n\tpanose-1:2 11 6 6 2 2 2 3 2 4;}\n@font-face\n\t{font-family:\"Lucida Handwriting\";\n\tpanose-1:3 1 1 1 1 1 1 1 1 1;}\n/* Style Definitions */\np.MsoNormal, li.MsoNormal, div.MsoNormal\n\t{margin:0in;\n\tfont-size:12.0pt;\n\tfont-family:\"Aptos\",sans-serif;\n\tmso-ligatures:standardcontextual;}\nspan.EmailStyle17\n\t{mso-style-type:personal-compose;\n\tfont-family:\"Aptos\",sans-serif;\n\tcolor:windowtext;}\n.MsoChpDefault\n\t{mso-style-type:export-only;}\n@page WordSection1\n\t{size:8.5in 11.0in;\n\tmargin:1.0in 1.0in 1.0in 1.0in;}\ndiv.WordSection1\n\t{page:WordSection1;}\n--></style><!--[if gte mso 9]><xml>\n<o:shapedefaults v:ext=\"edit\" spidmax=\"1026\" />\n</xml><![endif]--><!--[if gte mso 9]><xml>\n<o:shapelayout v:ext=\"edit\">\n<o:idmap v:ext=\"edit\" data=\"1\" />\n</o:shapelayout></xml><![endif]--></head><body lang=EN-US link=\"#467886\" vlink=\"#96607D\" style='word-wrap:break-word'><div class=WordSection1><p class=MsoNormal><span style='font-size:10.0pt'>Hi Jitesh,<o:p></o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt'>Please let me know if you will be teaching us also how to avoid responding to spam.<o:p></o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt'>With thanks<o:p></o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p><p class=MsoNormal><b><span style='font-size:10.0pt;font-family:\"Lucida Handwriting\";mso-ligatures:none'>Kantha<o:p></o:p></span></b></p><p class=MsoNormal><span style='font-size:10.0pt;font-family:\"Calibri\",sans-serif;mso-ligatures:none'><o:p>&nbsp;</o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt;font-family:\"Georgia\",serif;mso-ligatures:none'>Kantha Shelke, Ph.D., CFS<o:p></o:p></span></p><p class=MsoNormal><b><span style='font-size:10.0pt;color:#002060;mso-ligatures:none'>Senior Lecturer, Johns Hopkins University</span></b><b><span style='font-size:10.0pt;font-family:\"Calibri\",sans-serif;color:#002060;mso-ligatures:none'><o:p></o:p></span></b></p><p class=MsoNormal><span style='font-size:10.0pt;mso-ligatures:none'><o:p>&nbsp;</o:p></span></p><p class=MsoNormal><b><span style='font-size:10.0pt;font-family:\"Arial Narrow\",sans-serif;color:#000066;mso-ligatures:none'>Principal, Corvus Blue LLC<o:p></o:p></span></b></p><p class=MsoNormal><span style='font-size:10.0pt;font-family:\"Georgia\",serif;mso-ligatures:none'>33 West Ontario, Suite 57F<o:p></o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt;font-family:\"Georgia\",serif;mso-ligatures:none'>Chicago, IL 60654<o:p></o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt;font-family:\"Georgia\",serif;mso-ligatures:none'>Office: (312) 951-5810<o:p></o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt;font-family:\"Georgia\",serif;mso-ligatures:none'>Cell: (312) 437-5810<o:p></o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p><p class=MsoNormal><span style='font-size:10.0pt'> <o:p></o:p></span></p></div></body></html>",
+          "text": "Hi Jitesh,\n\n \n\nPlease let me know if you will be teaching us also how to avoid responding\nto spam.\n\n \n\nWith thanks\n\n \n\nKantha\n\n \n\nKantha Shelke, Ph.D., CFS\n\nSenior Lecturer, Johns Hopkins University\n\n \n\nPrincipal, Corvus Blue LLC\n\n33 West Ontario, Suite 57F\n\nChicago, IL 60654\n\nOffice: (312) 951-5810\n\nCell: (312) 437-5810\n\n \n\n",
+          "textAsHtml": "<p>Hi Jitesh,</p><p>Please let me know if you will be teaching us also how to avoid responding<br/>to spam.</p><p>With thanks</p><p>Kantha</p><p>Kantha Shelke, Ph.D., CFS</p><p>Senior Lecturer, Johns Hopkins University</p><p>Principal, Corvus Blue LLC</p><p>33 West Ontario, Suite 57F</p><p>Chicago, IL 60654</p><p>Office: (312) 951-5810</p><p>Cell: (312) 437-5810</p>",
+          "subject": "sample email for testing",
+          "date": "2026-03-29T16:11:42.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "jitesh@pdfmunk.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:jitesh@pdfmunk.com\" class=\"mp_address_email\">jitesh@pdfmunk.com</a></span>",
+            "text": "jitesh@pdfmunk.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "kantha@corvusblue.net",
+                "name": "Kantha Shelke"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Kantha Shelke</span> &lt;<a href=\"mailto:kantha@corvusblue.net\" class=\"mp_address_email\">kantha@corvusblue.net</a>&gt;</span>",
+            "text": "\"Kantha Shelke\" <kantha@corvusblue.net>"
+          },
+          "messageId": "<045801dcbf96$bc2e1ad0$348a5070$@corvusblue.net>"
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "id": "19d3a5d6791550bd",
+          "threadId": "19d3a5d6791550bd",
+          "labelIds": [
+            "IMPORTANT",
+            "CATEGORY_PERSONAL",
+            "INBOX"
+          ],
+          "sizeEstimate": 7545,
+          "headers": {
+            "delivered-to": "Delivered-To: jitesh@pdfmunk.com",
+            "received": "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n        by mx.google.com with SMTPS id 2adb3069b0e04-5a2b1450718sor602330e87.18.2026.03.29.09.11.32\r\n        for <jitesh@pdfmunk.com>\r\n        (Google Transport Security);\r\n        Sun, 29 Mar 2026 09:11:32 -0700 (PDT)",
+            "x-received": "X-Received: by 2002:ac2:4e0a:0:b0:59f:9214:ac61 with SMTP id\r\n 2adb3069b0e04-5a2ab929dc3mr3602305e87.35.1774800691912; Sun, 29 Mar 2026\r\n 09:11:31 -0700 (PDT)",
+            "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1774800692; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=TaTIwken0vllKwiwE3OGVwFhEpemwCfEdZF9P8xSkfvz2DZXiJJyOwZJveUM+GSLEj\r\n         LMlM/vU5QxRvfZVKS7IscdnFexWRqVFVU7uN8FWJBbHODgZ8PB+6Ruz850TOUIe4zNUd\r\n         Y46nQWnR1Pgr0Vck+I5HoGilhkyu2HQQb2hIyqq4pNgD8yZojmMwMOzP5lmW9Zx9q1VT\r\n         R/1Nsyee5nMoW1NYqAMvF9NwIJC420rEKZrA6QCIBzgAbmjJB497t6tfdnqtvR7MgX8f\r\n         YFVFZ8UWaqDjjz3r/NCVQvtsn0G4L7IMAt0b00WwCf9wYRH4yXjQKYcGo4UrXAbOX95V\r\n         vFdw==",
+            "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:subject:message-id:date:from:mime-version:dkim-signature;\r\n        bh=l1jx3MkYMtr6hRt2dYIU7uIwAJ6+zvA4LMf2Bt3ucc4=;\r\n        fh=wkWL1p+GxZee2sMl7jmiOoES+V2gR7rSbfQK43Zybt0=;\r\n        b=HYZqkn90TUAYEdDYbHuNTJaGVX+ce5w+VToI4T/Ka+yVPNRLkknb+PN6OgCRjsw+gT\r\n         EsCic4PzdrOZkzmu9MdqsOYXs11JyfofmuwefppDU08cYgqmnbH2CHAmAu/crKTTA1mj\r\n         s7nIyZKq9hjnGI6EQo4Ys8Ytu2Ou0QtIcp5vdGE5TsT4aa4VCPgsokGXPMiKqjMuL7xj\r\n         Ubcx/9i60VuIoFa7/p2Zy1bU4+vGae59oMmL4buLMfd55pQOWtiqK6M6Op8ZgaA4m6sN\r\n         3tgpOBnpno4jIsRUZIWXC8F6o/H3PmJwni9gy0iw4/rnYG962v/paoz19SUDpLSFWjR6\r\n         LSBg==;\r\n        darn=pdfmunk.com",
+            "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com; arc=none",
+            "return-path": "Return-Path: <hitanshub@gmail.com>",
+            "received-spf": "Received-SPF: pass (google.com: domain of hitanshub@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+            "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20251104 header.b=NkaBcczg;\r\n       arc=pass (i=1);\r\n       spf=pass (google.com: domain of hitanshub@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=hitanshub@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=neutral header.i=@pdfmunk.com",
+            "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20251104; t=1774800692; x=1775405492; darn=pdfmunk.com;\r\n        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject\r\n         :date:message-id:reply-to;\r\n        bh=l1jx3MkYMtr6hRt2dYIU7uIwAJ6+zvA4LMf2Bt3ucc4=;\r\n        b=NkaBcczgv5BheosCt240TmhNeG9x7H8drS4tz4OVYx2BeCOIz6DrYgA1hEM5prENPu\r\n         2Z4+kNInhhunFfKF9Ags+H2jjw7SQrbZnnDy0C4zXIHRpd08xGjl279q34eEvPL7vxQZ\r\n         8L3k2FGyNVctdM1LMx1Eo9ntbtFXp/7CSQ+UeikcCYL6A2h8IU7xneUmrX5/4qB1Jb7r\r\n         QGqNBrAcEswyYNdNPbIj0lq5TbT0COCpqV8Ad0cGl+g1k7rE+rUTGVQuPxLtAtE4puhb\r\n         +O5SPf6473Wswjd7SWvIIo22XnrZTDHWKyFNNS0YBDzmw4M8lqztfiyqIbSlxOES01uW\r\n         GQ9Q==",
+            "x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20251104; t=1774800692; x=1775405492;\r\n        h=to:subject:message-id:date:from:mime-version:x-gm-gg\r\n         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;\r\n        bh=l1jx3MkYMtr6hRt2dYIU7uIwAJ6+zvA4LMf2Bt3ucc4=;\r\n        b=NlxooX44N/P1AyDAnfXITP1riKxxL/zppa7SJcJQ0r4GEB6ijOycaOdXrWSkzCALIr\r\n         Ftenec5tccSH1Gznw4KQnZJed63Ai0LpRNNEzBpe4Y6rulfYIZDj5eLwI5NJ1Yc7FYoD\r\n         2VChcJUJnEPAwx+1nxOd/T9n/WOok72gWOdqPeact7jUDxE4Wl1jndPIQCIfxmoQ1GCI\r\n         YdGrwIBX7iF/ylQjyU8uS+KV1rsQGDq/3Ch0cNikIHSDpZOOaA+0wyyqF8GG5K4AbwUl\r\n         OKgy29LgBApGXDmcCvMj3xIuzP/fqeajuOH2Brq+7EaA5UYswjLRHa3H0lUkwBPb75I+\r\n         sraw==",
+            "x-gm-message-state": "X-Gm-Message-State: AOJu0YxUZE/0UOQ74UQp8RAkiVWXxZ4zfTXCGEn24Q8c8kpsGlqW0JXu\r\n\tu3QJ9z/c19Xdvgwsm15xbHn0l9k2Dm5bE4OY6E7MH8mSbua8O/H9E3ZMUiohNAR49di7Z7FatxW\r\n\txNvlEcEWfKVap5G8zboof16/eIpECHR2lWMXk5Sk=",
+            "x-gm-gg": "X-Gm-Gg: ATEYQzy1K5yGQJTn7OiFePTHRVEBDlHzldlDGDQPd8Tm5tHO/4Hj4XA4vZwk8LETqAN\r\n\tdxjoTWCrodpmxFdgCkCBOqSk0ZkARF/FuT79L5J0+oMxLKt9ro0NOpnwvmfeL+XJtHAhr4uaT5R\r\n\t5YAjPufyoun//n9zbKiR7RxyGd61pB9FdeUeHc4BQVts/CPedn6U2hsQmOmBQFQC0ryafiqiLbh\r\n\teJTVhbFxfcuNxVybzQf77hT3LIVEH4DQ6wYYp5yht55lK0bC+ZPxRFmBSlwWAuroKuWc8PtZ59n\r\n\tEmO1xPUnzG+Qm23NMdw+HSDOE0xHTYPzUMjB6Q==",
+            "mime-version": "MIME-Version: 1.0",
+            "from": "From: Hitanshu Bhattacharjee <hitanshub@gmail.com>",
+            "date": "Date: Sun, 29 Mar 2026 17:11:21 +0100",
+            "x-gm-features": "X-Gm-Features: AQROBzBkKtI9SLhznUIPWUlpKLajlAeHSRgziiU9bLiKR1b2sSxcy6yZhU8fYh0",
+            "message-id": "Message-ID: <CALQGZXuymTW-cAm+zwoiQnjTgEkbcrTf2eKc+JKf5W_S64_mqg@mail.gmail.com>",
+            "subject": "Subject: Invoice",
+            "to": "To: jitesh@pdfmunk.com",
+            "content-type": "Content-Type: multipart/alternative; boundary=\"000000000000c9e4d8064e2bfcbf\""
+          },
+          "html": "<div dir=\"ltr\"><br><p class=\"ri_default_signature\" id=\"ri_default_signature\"><i>Sent with <a class=\"asasd\" href=\"https://www.rightinbox.com/?utm_source=signature\" style=\"color:#a0d469\">Right Inbox</a></i></p>Dear Jitesh,<div><br></div><div>Please let me know when you will pay my inovice for £1000?</div><div><br></div><div>Regards,</div><div><br></div><div>Hitanshu</div></div>\n",
+          "text": "*Sent with Right Inbox <https://www.rightinbox.com/?utm_source=signature>*\nDear Jitesh,\n\nPlease let me know when you will pay my inovice for £1000?\n\nRegards,\n\nHitanshu\n",
+          "textAsHtml": "<p>*Sent with Right Inbox &lt;<a href=\"https://www.rightinbox.com/?utm_source=signature\">https://www.rightinbox.com/?utm_source=signature</a>&gt;*<br/>Dear Jitesh,</p><p>Please let me know when you will pay my inovice for &pound;1000?</p><p>Regards,</p><p>Hitanshu</p>",
+          "subject": "Invoice",
+          "date": "2026-03-29T16:11:21.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "jitesh@pdfmunk.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:jitesh@pdfmunk.com\" class=\"mp_address_email\">jitesh@pdfmunk.com</a></span>",
+            "text": "jitesh@pdfmunk.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "hitanshub@gmail.com",
+                "name": "Hitanshu Bhattacharjee"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Hitanshu Bhattacharjee</span> &lt;<a href=\"mailto:hitanshub@gmail.com\" class=\"mp_address_email\">hitanshub@gmail.com</a>&gt;</span>",
+            "text": "\"Hitanshu Bhattacharjee\" <hitanshub@gmail.com>"
+          },
+          "messageId": "<CALQGZXuymTW-cAm+zwoiQnjTgEkbcrTf2eKc+JKf5W_S64_mqg@mail.gmail.com>"
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "id": "19d3a5d041cdfeb0",
+          "threadId": "19d3a5cecb04f932",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "sizeEstimate": 724,
+          "headers": {
+            "received": "Received: from 841762497736\r\n\tnamed unknown\r\n\tby gmailapi.google.com\r\n\twith HTTPREST;\r\n\tSun, 29 Mar 2026 09:11:07 -0700",
+            "to": "To: shijupobox@gmail.com",
+            "in-reply-to": "In-Reply-To:\r\n <CAOV+FnDq5cPWfLHhMD-eQeOY2_L6nk_AN1p24Gjcdo=cGM2UTg@mail.gmail.com>",
+            "subject": "Subject: Hi",
+            "message-id": "Message-Id: <CA+k=kiurseBy_YC=S3Z4srykztpCVv1XJS30Vn0ZnB=PD5907Q@mail.gmail.com>",
+            "content-transfer-encoding": "Content-Transfer-Encoding: quoted-printable",
+            "date": "Date: Sun, 29 Mar 2026 09:11:07 -0700",
+            "mime-version": "MIME-Version: 1.0",
+            "content-type": "Content-Type: text/plain; charset=utf-8",
+            "from": "From: jitesh@pdfmunk.com"
+          },
+          "text": "Dear [Name],\n\nThank you for reaching out. Could you please provide more details about the appointment you need, including your preferred date and time?\n\nLooking forward to your response.\n\nStay Healthy  \nJitesh Dugar\n",
+          "textAsHtml": "<p>Dear [Name],</p><p>Thank you for reaching out. Could you please provide more details about the appointment you need, including your preferred date and time?</p><p>Looking forward to your response.</p><p>Stay Healthy<br/>Jitesh Dugar</p>",
+          "subject": "Hi",
+          "date": "2026-03-29T16:11:07.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "shijupobox@gmail.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:shijupobox@gmail.com\" class=\"mp_address_email\">shijupobox@gmail.com</a></span>",
+            "text": "shijupobox@gmail.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "jitesh@pdfmunk.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:jitesh@pdfmunk.com\" class=\"mp_address_email\">jitesh@pdfmunk.com</a></span>",
+            "text": "jitesh@pdfmunk.com"
+          },
+          "messageId": "<CA+k=kiurseBy_YC=S3Z4srykztpCVv1XJS30Vn0ZnB=PD5907Q@mail.gmail.com>",
+          "inReplyTo": "<CAOV+FnDq5cPWfLHhMD-eQeOY2_L6nk_AN1p24Gjcdo=cGM2UTg@mail.gmail.com>",
+          "html": false
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "id": "19d3a5d038eb749f",
+          "threadId": "19d3a5d038eb749f",
+          "labelIds": [
+            "IMPORTANT",
+            "CATEGORY_PERSONAL",
+            "INBOX"
+          ],
+          "sizeEstimate": 7541,
+          "headers": {
+            "delivered-to": "Delivered-To: jitesh@pdfmunk.com",
+            "received": "Received: from sonic.gate.mail.ne1.yahoo.com by sonic317.consmr.mail.bf2.yahoo.com with HTTP; Sun, 29 Mar 2026 16:11:06 +0000",
+            "x-received": "X-Received: by 2002:a05:622a:345:b0:50b:7113:7170 with SMTP id d75a77b69052e-50ba395d15cmr134277081cf.39.1774800667178;\r\n        Sun, 29 Mar 2026 09:11:07 -0700 (PDT)",
+            "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1774800667; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=HoqsjDY6RrbjQSboeaFW1WSc8U0jUkxCNOgzMShT9v+v0JzlER2NaB8ncUYuss1NSL\r\n         76n397fT1eGu7ThPaSSUyWeUqOvH96bf6+TmrMNgFYR3lbFvcWO90qHmXcgLIpKF8JkQ\r\n         nFrr64PTGIOaxbSN67py2l5NCuttwieuwnw+bfAqEMn38Zb885Xh8j06Z4WZCGClGIkb\r\n         kgAnZwR3eiFXq8MhRDijen/ttvzL2DrMKwYwiMtq6uanYxGbCXSQm4kRqXKG8NwE0/BU\r\n         EBFdNZslmmporS2UQBX99kL5Sen9ahifEf9A2fnKoCe6v7sjKMJ0rbb20c93qRlf8DXv\r\n         4+/A==",
+            "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=references:mime-version:subject:message-id:to:from:date\r\n         :dkim-signature;\r\n        bh=rjT4g5vUs+yDa9xIPeBYPyWiSiYAV6Vd7gCXLJvhZQY=;\r\n        fh=FyIeH2J1mPUQ1b/9HSiRA2tkZ71qLQ6ZJiQZ8xi/K4A=;\r\n        b=CL85veL8aFWzwaJ3r/1RxXVGys4HXHsxdkFBbeZN82Pu49HObyvPO7b+Y5RkVdASca\r\n         0k+4K65fjckp4irD+CIk8moPpaB/9nQJpC5I8LZMmrj+4lxe3UKys8QcWQ2etdDmcrUq\r\n         BxRZ7eGOKIrk4G0BXEKj4bMRBvGkrcfxGayZohQljapPtXB9gkoKNur6oYs/nlKB4rzf\r\n         xbECssq2U3Vdcf/ISJpCAWw01K88gVFgCQnIL7eKVMu6EaqmL25v9FS6nwCuzSC6uEQP\r\n         AbVz+AJRae26nXL6RBZ9X3hmxGyLqfDpDGOQ47WGBNH01fkS8gdcyEePFNi1FtUbZwJC\r\n         NIpA==;\r\n        dara=google.com",
+            "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com;\r\n       dkim=pass header.i=@yahoo.com header.s=s2048 header.b=QMC+VeW7;\r\n       spf=pass (google.com: domain of shilpa_thacker@yahoo.com designates 74.6.129.81 as permitted sender) smtp.mailfrom=shilpa_thacker@yahoo.com;\r\n       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=yahoo.com",
+            "return-path": "Return-Path: <shilpa_thacker@yahoo.com>",
+            "received-spf": "Received-SPF: pass (google.com: domain of shilpa_thacker@yahoo.com designates 74.6.129.81 as permitted sender) client-ip=74.6.129.81;",
+            "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@yahoo.com header.s=s2048 header.b=QMC+VeW7;\r\n       spf=pass (google.com: domain of shilpa_thacker@yahoo.com designates 74.6.129.81 as permitted sender) smtp.mailfrom=shilpa_thacker@yahoo.com;\r\n       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=yahoo.com",
+            "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1774800666; bh=rjT4g5vUs+yDa9xIPeBYPyWiSiYAV6Vd7gCXLJvhZQY=; h=Date:From:To:Subject:References:From:Subject:Reply-To; b=QMC+VeW76+uo2z4m/0WC6uRbxM03OlJxjggOfEiRLDZaPCbsDvs28aH+xnXOicBBP84ygzAIBj1sSjGijKEUfss727Tg40LIw2cVHIs9HhM6/tkC6dJkbCTpNKNuavOmp1aMoWSGNsrOkSc+F8Is18lwNKmHWQ//LCovP9qpnE875HXklARFtn8Obkelw6bNvU6Xj8qe0PkLViCYKrQBWhfRNQTkbcHfEAppiw1kEDKurjvIDZtJukI0u0qKDe1BWfzuugGtbrnpgbOtLq+NZ2Y2n9v/EaxRoAMvKqrAKHXZNGOVaD7EJpSZthgWEfuY2zYxzvEOADx76ybdENwRvQ==",
+            "x-sonic-dkim-sign": "X-SONIC-DKIM-SIGN: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1774800666; bh=35cJSSkwd4MvtOaQyCk0+YarQMuu8nekGE9GGcz1PB2=; h=X-Sonic-MF:Date:From:To:Subject:From:Subject; b=gtDiCwViX7dhyl6F75qYO9YbbHSoN91rx45GtEXrzJhYqvmRKCSBeLtuF3Tm9Y3SRawh0qk32L0LRbWWf7XCS6PmxFcsAgolFRn0eMi3rzqQlWemB/cBNERQ53MfuypyyEtXWUf3+0ShJYRaOtFQwy42tbf4uotM8NNoABpcj01+T/DILYm7sUo0DqByUc8FxS6RlEwW2GLXid+Lr9wNVM9m/gdMD2gqlHCTcp7Xv3bz70hJLmOzWR+LEtHF5RF/dn0V1FdxX+RdiCMHVDLWImj9zqQRVplz+uiDOOaXeplPHmPJ1hM2BmhdEL3q90cNsmcs2N4AYcebQXlZIRh2zg==",
+            "x-ymail-osg": "X-YMail-OSG: 1hQDONwVM1n05LSO.hIGjMPwrzghdua1Ady.8L85f8eFKD.SrqxfLNnmxO6A_7M\r\n nvNAM5W7uI8pk4XlAnx2CNDnzKeeOb__VhUGbHjIkcLezDhCgdXaZEKb.GV9e07pnTtbIMYR5_gf\r\n Y.xPXXDeqLvnCcChdJFkM_cYVzdmA1kTgKEhDGMRDML2qdjVEQDyfaFpEn7Y2YZIkd5gHcyuWBac\r\n oW3YEitY0d4.BCj9BsSKovYseqCyRrCVOnMD5uZXAfGcbrHjuavUUPT0JAEc9KNAnhUU3907WD8n\r\n E2CYt49ONwcuS5KLrxtu6dxEr08pr6EXpR70z_qbUTCmWp0MJYzETqMIvzx88oXgQTTQogCMtnSu\r\n zvWvNlCkzOXiTSRSfMrsRRkmWRXQegSU0UtQ4E8U24QVQlovAIIAmw9CacT7opkKAvG1US8zevXq\r\n mlF61OHCG.geG5kUbZ6Uz0izmBYF1jD97s.__0HajTmsZvy1zofVwnLtfAkXZf1c7.XRQM_JOwwZ\r\n KP4ikuLt1BTEcYKpNceawBPKc9oQy9iRA61YpRWjYXwkz.Le9J9_oqYXOL4KIguKpXSr0Wv7QGiR\r\n Z8M9U61j_7C6CUU.3xnUK_R66F4CWUl2W4ZwdITuXrY2r2dL3iVE_g3lrPMDuiM7IRbWfywBtfgF\r\n VdomnybmBcdn3KEleIsW4vWqCK1TCT0cj0u.XoI2d5rWVFC.X71tuiE0ml.ZvcCWeZ7UwGTkkjWS\r\n WNUPQczUBmQld6NNAwV_13mHwS9FLzEhV_ieYgEpmefQBjSdVhKRH10W_VarAlO5TIOB1KrPoSHg\r\n cBnlppSXHFW.2OWmc7QXD7BTZ.sll16edGKrSwtCym8a.YTdkX3y5_Kmcp5zBOCTpgZbxMqTsii7\r\n MRKuyH41BDv4c.eNYKzJLlU6ALjZTI0qq1yjZRxpFWlOftq.LdFgrF88fBbqDc41AWligCU3Yqkm\r\n KgDwU2Bad0NvF3jO9Lutq0pU0I0MX3Bf7YzM7zZLNoSaTVjJM2aru1IZWOags5utSkIbDGEKtdmj\r\n KgJuxrdeNpgY3qH3ATKbhztIPn.H9ch25IgJDJyeDfTIjkpOYk3MSePVZbsLh15x1WVj0fwtvtCq\r\n enC4WMs37ColAPh6sdLEDJst0HhI_66MsLW3tglD5sj7d1OtQ7iXktMB8bv7HfpJtxUPN5JJi.WA\r\n rQVtkehzkP.XBB9aPwu1x1OQXxQk8ct8HuuDpvkU_rhlcCKnb0hnS0YcxaOEi8Bf.UvIfczQSvp9\r\n pMULtscvFcCpzlK9izGz0EurmN0wG.kHxoqc_veaJiXBAbmIr.rdB6Ue4_DH5v4TUGu0jpd1GHWX\r\n cF5H6iks3CQadjNCEEZO5AE4zvuDXri8h2fCpZE2uArNhkMOUq3EkPZf_iPc1gy10QU.OrYWW8uw\r\n tuRgrbsBfD26XSigVpv6GQ.XHtGbOafzv6ZCHoAsU70kpLMETvF_ve8y0w567M_1HsRXAf6fZigW\r\n .zc6.pTJxTZVRog5HQqvmETkotkG0zLPebzbKKHqIarSSKcA7c2Sus8c8PZvrzlGFDKZJwoE9FQP\r\n 3JZrik8kYC9SkkPCsxRizUbDjKyYAyyHtcx5mrBBCljFmQoqZHRMZbz5_nA2KF6ot86F2oi.GwbU\r\n 8_FaGKWtAdQNl_bDHCyBuFMaF27VCp6Q2kjTFMPmo5yGwVqDchohGfVvu2KJYL5BqlWNcq8K_6uY\r\n yH57mlcpfsLuT0k6XoDjiZjcvm8iL7yUqHy0byatA2g_IlK3GGvi1TzFmHsHNBoUJe9TGXuYQyt1\r\n 5NZhlsN4MTmjHlc53ft_6S7cyw_0VdOES1.44kz0psmdVLG_EQuzm624zb2mqBhBiTCJA6L35CCY\r\n 0eq_zXFKpHLHaIuc.Qj0pBrNieRD4d8RsXxdAKOnaV.FV0tVjKrQeP3ahWkR1waI0eqFGtjpfLPQ\r\n zmUpUse0fQ.UkdvUtnGNZBsfh7CLvIYml1ZX1URTZ6QQoNe9W5WI9byMVJJedkrb6X1p4LmqZgRx\r\n Lr1jt3bRbKaCsbaiFW5pvMra0gsiouQjjYQ9N.7C3G6IkPqqi8bXoVir9zbBvf0xeaCpki7n1YFg\r\n 8CUO06Am.injpHM7ro4Q0nKIm0X9wDcPFhXFXA.CvCIxM7vLfRf_d_NFRh3FOtfxlxfv4q2iPQ.6\r\n PGXAAS4mPGm1wsHErDGb2Xo7Grz2_ZXA0HDIUYWpFTgO1StqYHGqW.8GLnh6tG67rOpfRLzGNRyV\r\n g4tOpAYtwFlBjWwXVf8aXrNfPWvVxdElvEuYS6RhcYHGBaRAdBB7NCpXj",
+            "x-sonic-mf": "X-Sonic-MF: <shilpa_thacker@yahoo.com>",
+            "x-sonic-id": "X-Sonic-ID: a20c47f1-3a0b-46bc-94a0-a77aaa53c40b",
+            "date": "Date: Sun, 29 Mar 2026 16:11:04 +0000 (UTC)",
+            "from": "From: SHILPA THACKER <shilpa_thacker@yahoo.com>",
+            "to": "To: \"jitesh@pdfmunk.com\" <jitesh@pdfmunk.com>",
+            "message-id": "Message-ID: <761790735.860024.1774800664021@mail.yahoo.com>",
+            "subject": "Subject: Workflow Testing",
+            "mime-version": "MIME-Version: 1.0",
+            "content-type": "Content-Type: multipart/alternative; \r\n\tboundary=\"----=_Part_860023_2085158735.1774800664020\"",
+            "references": "References: <761790735.860024.1774800664021.ref@mail.yahoo.com>",
+            "x-mailer": "X-Mailer: WebService/1.1.25449 YMailNorrin",
+            "content-length": "Content-Length: 543"
+          },
+          "html": "<html><head></head><body><div class=\"yahoo-style-wrap\" style=\"font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:13px;\"><div dir=\"ltr\" data-setdir=\"false\">This email for Workflow testing</div></div></body></html>",
+          "text": "This email for Workflow testing",
+          "textAsHtml": "<p>This email for Workflow testing</p>",
+          "subject": "Workflow Testing",
+          "references": "<761790735.860024.1774800664021.ref@mail.yahoo.com>",
+          "date": "2026-03-29T16:11:04.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "jitesh@pdfmunk.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:jitesh@pdfmunk.com\" class=\"mp_address_email\">jitesh@pdfmunk.com</a></span>",
+            "text": "jitesh@pdfmunk.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "shilpa_thacker@yahoo.com",
+                "name": "SHILPA THACKER"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">SHILPA THACKER</span> &lt;<a href=\"mailto:shilpa_thacker@yahoo.com\" class=\"mp_address_email\">shilpa_thacker@yahoo.com</a>&gt;</span>",
+            "text": "\"SHILPA THACKER\" <shilpa_thacker@yahoo.com>"
+          },
+          "messageId": "<761790735.860024.1774800664021@mail.yahoo.com>"
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Gmail trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate email reply for an English client1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Needs Reply": {
+      "main": [
+        [
+          {
+            "node": "Generate email reply for an English client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate email reply for an English client": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Create Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate email reply for an English client1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate email reply for an English client1": {
+      "main": [
+        [
+          {
+            "node": "If Needs Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate email reply for an English client",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ea836f81-2ecd-4e51-954c-f1aefaa1d2b0",
+  "meta": {
+    "templateId": "4870",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "277842713620d9f5554de3b1518b865a152c8c4db680008bd8aec536fc18b4a8"
+  },
+  "id": "Wm7GbjYU3mq44Z3T",
+  "tags": []
+}
