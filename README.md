@@ -1,0 +1,1 @@
+Playwright QA Automation Suite built during the Outskill AI Generalist Fellowship. Covers login flow automation, form interaction and browser state management using Playwright and JavaScript. Includes n8n workflow integration for automated test triggering. Demonstrates AI-assisted QA methodology applied in a regulated enterprise context
