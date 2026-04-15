@@ -1,0 +1,552 @@
+{
+  "name": "Rag customer support agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -832,
+        64
+      ],
+      "id": "db294ea2-4a95-403e-85d7-a3d61e81bbd9",
+      "name": "When chat message received",
+      "webhookId": "2ff00072-551d-4eaf-94bc-2835acdc1864"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        192
+      ],
+      "id": "e66e4491-8006-4ef3-846d-c8ea63bc05c9",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        400
+      ],
+      "id": "d35ea82b-1823-4e2f-8205-ef7668d09405",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sandhyarag",
+          "mode": "list",
+          "cachedResultName": "sandhyarag"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -576,
+        -32
+      ],
+      "id": "bca9c6ac-decf-4fa2-a47d-edb4a10789b8",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "DKkbNStSOLlV7DYn",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -832,
+        712
+      ],
+      "id": "43f8b8b5-c04c-4036-be5a-b834ab37fe1e",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PIMrt731kJnnyz9O",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "claude-haiku-4-5-20251001"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=\"Help me classify the below email into Job Search or not. If the email is related to a job application, recruiter reply or interview invitation, respond with 'Job Search'. Otherwise, respond with 'Not Job Search'. Never reply with anything other than 'Job Search' or 'Not Job Search'.\nEmail Subject: {{ $json.Subject }}\nEmail Body: {{ $json.snippet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        712
+      ],
+      "id": "badc6531-3132-4d9b-8d46-e3ff3f1e5bbd",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "G9e3XYkiLTDKP7fm",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f642c33e-56bb-4931-ba7d-69d874b2d5c2",
+              "leftValue": "={{ $json.content[0].text }}",
+              "rightValue": "Head of ",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "81991908-cdf6-4add-85c5-d22953cd7813",
+              "leftValue": "{{ $json.content[0].text }}",
+              "rightValue": "Director of",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "d3b9fe45-a956-452c-92ab-407b53afbf77",
+              "leftValue": "{{ $json.content[0].text }}",
+              "rightValue": "VP of Engineering",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        712
+      ],
+      "id": "cd2a87fc-e047-479e-a328-8ba0e66f000a",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "formTitle": "file upload",
+        "formDescription": "upload ur documents ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "upload ur file ",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -832,
+        -128
+      ],
+      "id": "d5b03f0a-c86c-4808-a1e5-61df5e7e7830",
+      "name": "On form submission",
+      "webhookId": "b761d928-9b41-48d7-a763-17efeb8116c9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Gmail Trigger').item.json.Subject }}\nemail Body :{{ $('Gmail Trigger').item.json.text }}",
+        "options": {
+          "systemMessage": "=You are Sandy's personal job search assistant. You handle incoming recruiter emails and job alerts and respond accurately based on Sandy's CV and application history stored in the vector store.\n\n## Core Principles\n- **Accuracy First**: Only use information from Sandy's CV and cover letters in the vector store. Never invent achievements, companies or metrics.\n- **Concise and Direct**: Keep responses brief and professional.\n- **Evidence Driven**: Every claim must come from the vector store documents.\n- **Action Focused**: Every response must move Sandy's job search forward.\n\n## Your Workflow\n\n### Step 1: Understand the Email\n- Read the incoming email carefully\n- Identify if it is a recruiter reply, interview invitation, job alert or rejection\n- Note the company name, role title and any specific questions asked\n\n### Step 2: Search the Vector Store\n- Use the \"Answer questions with vector store\" tool\n- Search for Sandy's relevant experience matching this company and role\n- Retrieve her strongest proof points for this specific situation\n- If no relevant information exists, state this clearly\n\n### Step 3: Draft the Response\n- Base the reply entirely on Sandy's actual experience from the vector store\n- Lead with her strongest metric for this role\n- Sign off as: Sandhya Yatham | 07530 274836 | yvsand81@yahoo.com\n\n### Step 4: Summarise for Sandy\nAfter the reply provide:\n- **Company**: Name and role\n- **Email Type**: Recruiter reply / Interview invite / Rejection / Job alert\n- **Action Taken**: What was drafted and why\n\n## Important Constraints\n- ❌ Never invent proof points not in the vector store\n- ❌ Never apply for roles without Sandy's confirmation\n- ❌ Never send emails automatically\n- ✅ Always flag interview invitations as HIGH PRIORITY\n- ✅ Always reference Sandy's NHS, JP Morgan or Tesco credentials where relevant\n- ✅ Always use her key metrics: 35% release frequency, 55% incident reduction, 8-month turnaround\n\n## Response Quality Checklist\nBefore outputting, ensure:\n- [ ] Response is based on vector store content only\n- [ ] At least one proof point or metric is included\n- [ ] Tone matches the email received\n- [ ] Sandy is addressed directly in the summary\n- [ ] Interview invitations are flagged immediately"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        104,
+        712
+      ],
+      "id": "dde1862d-043e-4ce1-a114-06e7bbf569b5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        936
+      ],
+      "id": "e27cd24b-e275-453e-9620-26952912364f",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "G9e3XYkiLTDKP7fm",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "use this tool for anser question and reply"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        936
+      ],
+      "id": "04042dc1-9c98-4ec9-a5c5-094f6fbac939",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sandhyarag",
+          "mode": "list",
+          "cachedResultName": "sandhyarag"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -8,
+        1144
+      ],
+      "id": "c9bcf5e7-a64f-4ddc-b95f-03c9cdd264ce",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "DKkbNStSOLlV7DYn",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        72,
+        1352
+      ],
+      "id": "7fc331b3-6f4d-4a04-929d-a29a98440f2a",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pJQl8YYpRRgd5mDS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        280,
+        1144
+      ],
+      "id": "125697ce-1d3e-4011-bd12-5fef8ddf7367",
+      "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "G9e3XYkiLTDKP7fm",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": ""
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        936
+      ],
+      "id": "b41102b0-2d09-4459-9d17-b1cf385208c4",
+      "name": "Reply to a message in Gmail",
+      "webhookId": "064f17d4-f31b-4495-b7bf-38b16c3d6d5e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PIMrt731kJnnyz9O",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -608,
+        192
+      ],
+      "id": "5f78c440-2bbb-4d81-bcff-59cf106eefc4",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y9ddUSneScZZSa33",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        []
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2328801d-8201-4abb-92a8-799d4fcfbfc1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "96d171da9174e56bf95b6a013fbd0e703f7c8706589c7ac76a8a22248c6850a5"
+  },
+  "id": "5R5sjYeJiFzGTe1C",
+  "tags": []
+}
