@@ -1,0 +1,16 @@
+{
+  "name": "jarvis-job-automation",
+  "version": "1.0.0",
+  "description": "Playwright job application automation - ARIA/Jarvis",
+  "scripts": {
+    "test": "playwright test",
+    "test:linkedin": "playwright test linkedin-easy-apply.spec.ts",
+    "test:apply": "playwright test apply-ready.spec.ts",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  }
+}
